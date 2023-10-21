@@ -24,7 +24,7 @@ main(int argc, char **argv)
   printf("pid\tstate\t\tsize\tpriority\tppid\tname\n");
   for (i=0; i<nprocs; i++) {
     state = states[uproc[i].state];
-    printf("%d\t%s\t%l\t%d\t\t%s\n", uproc[i].pid, state,
+    printf("%d\t%s\t%lu\t%d\t\t%s\n", uproc[i].pid, state,
                    uproc[i].size, uproc[i].priority, uproc[i].ppid, uproc[i].name);
   }
 
