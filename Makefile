@@ -137,6 +137,7 @@ UPROGS=\
 	$U/_pstree\
 	$U/_pstest\
 	$U/_test_priority\
+	$U/_pexec
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)
