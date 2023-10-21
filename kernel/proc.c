@@ -8,8 +8,6 @@
 #include "defs.h"
 #define MAXEFFPRIORITY 99
 
-
-
 struct cpu cpus[NCPU];
 
 struct proc proc[NPROC];
