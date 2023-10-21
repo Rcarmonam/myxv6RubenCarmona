@@ -468,11 +468,14 @@ void scheduler(void)
     }
 
     if (selected_proc != 0) {
+      release(&selected_proc->lock);
       // Switch to the selected process.
       selected_proc->state = RUNNING;
       c->proc = selected_proc;
       swtch(&c->context, &selected_proc->context);
 
+      acquire(&selected_proc->lock);
+      
       // Process is done running for now.
       // It should have changed its p->state before coming back.
       c->proc = 0;
@@ -583,6 +586,7 @@ wakeup(void *chan)
       acquire(&p->lock);
       if(p->state == SLEEPING && p->chan == chan) {
         p->state = RUNNABLE;
+        p->readytime = ticks;
       }
       release(&p->lock);
     }

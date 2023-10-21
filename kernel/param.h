@@ -14,6 +14,9 @@
 #define RR_SCHEDULER  0  // Round-robin scheduler
 #define PRIO_SCHEDULER 1  // Priority-based scheduler
 #define SCHEDULER PRIO_SCHEDULER  // Choose the scheduler here
+#define SCHED_PRIORITY 1  // Priority-based scheduler
+#define SCHED_AGING 2     // Priority-based scheduler with aging
+
 
 
 enum procstate { UNUSED, USED, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
