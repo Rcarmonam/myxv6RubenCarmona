@@ -6,6 +6,9 @@
 #include "proc.h"
 #include "pstat.h"
 #include "defs.h"
+#define MAXEFFPRIORITY 99
+
+
 
 struct cpu cpus[NCPU];
 
@@ -435,8 +438,7 @@ wait(uint64 addr)
 //  - swtch to start running that process.
 //  - eventually that process transfers control
 //    via swtch back to the scheduler.
-void
-scheduler(void)
+void scheduler(void)
 {
   struct proc *p;
   struct cpu *c = mycpu();
@@ -446,24 +448,37 @@ scheduler(void)
     // Avoid deadlock by ensuring that devices can interrupt.
     intr_on();
 
+    int highest_priority = -1; // Initialize highest_priority
+    struct proc *selected_proc = 0;
+
     for(p = proc; p < &proc[NPROC]; p++) {
       acquire(&p->lock);
       if(p->state == RUNNABLE) {
-        // Switch to chosen process.  It is the process's job
-        // to release its lock and then reacquire it
-        // before jumping back to us.
-        p->state = RUNNING;
-        c->proc = p;
-        swtch(&c->context, &p->context);
+        // Calculate effective priority based on aging policy
+        int effective_priority = min(MAXEFFPRIORITY, p->priority + (ticks - p->readytime));
 
-        // Process is done running for now.
-        // It should have changed its p->state before coming back.
-        c->proc = 0;
+        // Select process with highest effective priority
+        if (effective_priority > highest_priority) {
+          highest_priority = effective_priority;
+          selected_proc = p;
+        }
       }
       release(&p->lock);
     }
+
+    if (selected_proc != 0) {
+      // Switch to the selected process.
+      selected_proc->state = RUNNING;
+      c->proc = selected_proc;
+      swtch(&c->context, &selected_proc->context);
+
+      // Process is done running for now.
+      // It should have changed its p->state before coming back.
+      c->proc = 0;
+    }
   }
 }
+
 
 // Switch to scheduler.  Must hold only p->lock
 // and have changed proc->state. Saves and restores
