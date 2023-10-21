@@ -18,16 +18,18 @@ main(int argc, char **argv)
   };
 
   nprocs = getprocs(uproc);
-  if (nprocs < 0)
+  if (nprocs < 0) {
+    printf("Error: Unable to get process information\n");
     exit(-1);
+  }
 
-  printf("pid\tstate\t\tsize\tpriority\tppid\tname\n");
-  for (i=0; i<nprocs; i++) {
+  printf("pid\tstate\t\tsize\tpriority\tppid\tname\tage\n");
+  for (i = 0; i < nprocs; i++) {
     state = states[uproc[i].state];
-    printf("%d\t%s\t%lu\t%d\t\t%s\n", uproc[i].pid, state,
-                   uproc[i].size, uproc[i].priority, uproc[i].ppid, uproc[i].name);
+    int age = ticks - uproc[i].readytime;
+    printf("%d\t%s\t%lu\t%d\t\t%d\t%s\t%d\n", uproc[i].pid, state,
+           uproc[i].size, uproc[i].priority, uproc[i].ppid, uproc[i].name, age);
   }
 
   exit(0);
 }
-
