@@ -7,6 +7,9 @@
 #include "pstat.h"
 #include "defs.h"
 #define MAXEFFPRIORITY 99
+#ifndef min
+#define min(a, b) (((a) < (b)) ? (a) : (b))
+#endif
 
 struct cpu cpus[NCPU];
 
