@@ -40,18 +40,38 @@ sys_wait(void)
   return wait(p);
 }
 
+//Commenting this method for now
+// uint64
+// sys_sbrk(void)
+// {
+//   int addr;
+//   int n;
+
+//   if(argint(0, &n) < 0)
+//     return -1;
+//   addr = myproc()->sz;
+//   if(growproc(n) < 0)
+//     return -1;
+//   return addr;
+// }
+
 uint64
 sys_sbrk(void)
 {
-  int addr;
   int n;
-
   if(argint(0, &n) < 0)
     return -1;
-  addr = myproc()->sz;
-  if(growproc(n) < 0)
+  struct proc *curproc = myproc();
+  // Calculate new heap size
+  uint64 new_sz = curproc->sz + n;
+  // Ensure new_sz is within the process's address space limits
+  if (new_sz < curproc->sz || new_sz >= KERNBASE) {
     return -1;
-  return addr;
+  }
+  // Update the process's heap size without allocating physical memory
+  curproc->sz = new_sz;
+  // Return the old end of the heap (before growing)
+  return curproc->sz - n;
 }
 
 uint64
