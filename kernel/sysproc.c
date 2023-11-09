@@ -65,7 +65,7 @@ sys_sbrk(void)
   // Calculate new heap size
   uint64 new_sz = curproc->sz + n;
   // Ensure new_sz is within the process's address space limits
-  if (new_sz < curproc->sz || new_sz >= KERNBASE) {
+  if (new_sz < curproc->sz || new_sz >= TRAPFRAME) {
     return -1;
   }
   // Update the process's heap size without allocating physical memory
