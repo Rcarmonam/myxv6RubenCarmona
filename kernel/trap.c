@@ -37,6 +37,7 @@ void
 usertrap(void)
 {
   int which_dev = 0;
+  uint64 addr;
 
   if((r_sstatus() & SSTATUS_SPP) != 0)
     panic("usertrap: not from user mode");
@@ -67,7 +68,34 @@ usertrap(void)
     syscall();
   } else if((which_dev = devintr()) != 0){
     // ok
-  } else {
+    //ADDING CHANGES
+  } else if(r_scause() == 0xf){
+
+    addr = r_stval();
+    if(addr >= p -> sz && addr < p -> sz + MAXVA){
+      // Allocate a physical memory frame and install the page table mapping
+      char *mem = kalloc();
+      if (mem == 0) {
+        // Handle allocation failure (panic, exit, etc.)
+        printf("Out of memory\n");
+        p->killed = 1;
+      } else {
+        // Clear the allocated physical memory
+        memset(mem, 0, PGSIZE);
+        // Install the page table mapping for the faulting address
+        if (mappages(p->pagetable, addr, PGSIZE, (uint64)mem, PTE_W | PTE_X | PTE_R) != 0) {
+          // Handle mapping failure (panic, exit, etc.)
+          printf("Failed to map memory\n");
+          kfree(mem); // Free the allocated physical memory
+          p->killed = 1;
+        }
+      }
+    }else{
+      // Invalid access, handle it as appropriate (panic, exit, etc.)
+      printf("Invalid memory access at address %p\n", addr);
+      p->killed = 1;
+    }
+  }else{
     printf("usertrap(): unexpected scause %p pid=%d\n", r_scause(), p->pid);
     printf("            sepc=%p stval=%p\n", r_sepc(), r_stval());
     p->killed = 1;
