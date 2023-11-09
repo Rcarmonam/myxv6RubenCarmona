@@ -115,3 +115,9 @@ sys_freepmem(void){
   int count = kfreepagecount();
   return count*PGSIZE;
 }
+
+uint64
+sys_memoryuser(void){
+  int count = kfreepagecount();
+  return count*PGSIZE;
+}
