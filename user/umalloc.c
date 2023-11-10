@@ -66,6 +66,10 @@ malloc(uint nbytes)
   Header *p, *prevp;
   uint nunits;
 
+  //CHANGES
+  if (nbytes > UINT_MAX - sizeof(Header) + 1) {
+    return 0;  // Indicates failure
+  }
   nunits = (nbytes + sizeof(Header) - 1)/sizeof(Header) + 1;
   if((prevp = freep) == 0){
     base.s.ptr = freep = prevp = &base;
