@@ -1,7 +1,6 @@
 #include "kernel/types.h"
 #include "user/user.h"
 #include "kernel/stat.h"
-#include "sys/mman.h"
 
 #define BSIZE 10
 #define MAX 10
