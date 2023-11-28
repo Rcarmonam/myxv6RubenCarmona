@@ -516,7 +516,7 @@ sys_mmap()
   // Fill in struct mmr fields for new mapped region
   if (newmmr) {
     /* Calculate the start address of the new mapped region, make sure it starts on a page boundary */
-    start_addr = PGROUNDDOWN (p->cur_max); /**** your code goes here ****/
+    start_addr = PGROUNDDOWN (p->cur_max - length); /**** your code goes here ****/
     newmmr->valid = 1;
     newmmr->addr = start_addr;
     newmmr->length = p->cur_max - start_addr;
@@ -595,7 +595,6 @@ sys_munmap(void)
   /****
    Your code goes here
   ****/
-  // Add this code in the sys_munmap function where it says "your code goes here"
   if (argaddr(0, &addr) < 0)
     return -1;
   if (argaddr(1, &length) < 0)
