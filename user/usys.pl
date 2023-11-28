@@ -41,4 +41,4 @@ entry("freepmem");
 entry("memoryuser");
 entry("mmap");
 entry("munmap");
-entry("private"):
+entry("private");
