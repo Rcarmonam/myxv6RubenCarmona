@@ -41,7 +41,7 @@ void consumer()
 int
 main(int argc, char *argv[])
 {
-    buffer = (buffer_t*) mmap(NULL, sizeof(buffer_t),
+    buffer = (buffer_t *) mmap(NULL, sizeof(buffer_t),
 		               PROT_READ | PROT_WRITE,
 			       MAP_ANONYMOUS | MAP_PRIVATE,
 			       -1, 0);

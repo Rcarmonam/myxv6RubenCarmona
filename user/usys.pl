@@ -39,3 +39,6 @@ entry("uptime");
 entry("getprocs");
 entry("freepmem");
 entry("memoryuser");
+entry("mmap");
+entry("munmap");
+entry("private"):
