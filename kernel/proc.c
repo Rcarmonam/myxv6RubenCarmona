@@ -8,6 +8,7 @@
 #include "defs.h"
 #include "stat.h"
 
+
 struct mmr_list mmr_list[NPROC*MAX_MMR];
 struct spinlock listid_lock;
 
@@ -314,7 +315,7 @@ fork(void)
   }
 
   // Copy user memory from parent to child.
-  if(uvmcopy(p->pagetable, np->pagetable, p->sz) < 0){
+  if(uvmcopy(p->pagetable, np->pagetable,0, p->sz) < 0){
     freeproc(np);
     release(&np->lock);
     return -1;
@@ -338,7 +339,7 @@ fork(void)
   np->cur_max = p->cur_max;
 
   pid = np->pid;
-  
+
   // Copy mmr table from parent to child
   memmove((char*)np->mmr, (char *)p->mmr, MAX_MMR*sizeof(struct mmr));
   // For each valid mmr, copy memory from parent to child, allocating new memory for
