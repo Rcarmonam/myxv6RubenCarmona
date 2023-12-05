@@ -33,82 +33,74 @@ trapinithart(void)
 // handle an interrupt, exception, or system call from user space.
 // called from trampoline.S
 //
-void
-usertrap(void)
-{
-  int which_dev = 0;
-  uint64 addr;
+void usertrap(void) {
+    int which_dev = 0;
 
-  if((r_sstatus() & SSTATUS_SPP) != 0)
-    panic("usertrap: not from user mode");
+    if ((r_sstatus() & SSTATUS_SPP) != 0)
+        panic("usertrap: not from user mode");
 
-  // send interrupts and exceptions to kerneltrap(),
-  // since we're now in the kernel.
-  w_stvec((uint64)kernelvec);
+    w_stvec((uint64)kernelvec);
 
-  struct proc *p = myproc();
-  
-  // save user program counter.
-  p->trapframe->epc = r_sepc();
-  
-  if(r_scause() == 8){
-    // system call
+    struct proc *p = myproc();
 
-    if(p->killed)
-      exit(-1);
+    p->trapframe->epc = r_sepc();
 
-    // sepc points to the ecall instruction,
-    // but we want to return to the next instruction.
-    p->trapframe->epc += 4;
+    if (r_scause() == 8) {
+        if (p->killed)
+            exit(-1);
 
-    // an interrupt will change sstatus &c registers,
-    // so don't enable until done with those registers.
-    intr_on();
+        p->trapframe->epc += 4;
 
-    syscall();
-  } else if((which_dev = devintr()) != 0){
-    // ok
-    //ADDING CHANGES
-  } else if(r_scause() == 0xf || r_scause() == 13){
+        intr_on();
 
-    addr = r_stval();
-    if(addr < p -> sz){
-      // Allocate a physical memory frame and install the page table mapping
-      char *mem = kalloc();
-      if (mem == 0) {
-        // Handle allocation failure (panic, exit, etc.)
-        printf("Out of memory\n");
-        p->killed = 1;
-      } else {
-        // Clear the allocated physical memory
-        memset(mem, 0, PGSIZE);
-        // Install the page table mapping for the faulting address
-        if(mappages(p->pagetable, PGROUNDDOWN(addr), PGSIZE, (uint64)mem, PTE_W | PTE_X | PTE_R | PTE_U) != 0){ //(mappages(p->pagetable, addr, PGSIZE, (uint64)mem, PTE_W | PTE_X | PTE_R) != 0)
-          // Handle mapping failure (panic, exit, etc.)
-          printf("Failed to map memory\n");
-          kfree(mem); // Free the allocated physical memory
-          p->killed = 1;
+        syscall();
+    } else if ((which_dev = devintr()) != 0) {
+        // ok
+    } else if (r_scause() == 13 || r_scause() == 15) {
+        // Check mapped region protection permits operation
+        if (r_stval() >= p->sz) {
+            for (int i = 0; i < MAX_MMR; i++) {
+                if (p->mmr[i].valid && p->mmr[i].addr < r_stval() && p->mmr[i].addr + p->mmr[i].length > r_stval()) {
+                    // Page fault load
+                    if (r_scause() == 13) {
+                        // Read permission
+                        if ((p->mmr[i].prot & PROT_READ) == 0) {
+                            p->killed = 1;
+                            exit(-1);
+                        }
+                    }
+                    // Page fault store
+                    if (r_scause() == 15) {
+                        // Write permission
+                        if ((p->mmr[i].prot & PROT_WRITE) == 0) {
+                            p->killed = 1;
+                            exit(-1);
+                        }
+                    }
+                }
+            }
         }
-      }
-    }else{
-      // Invalid access, handle it as appropriate (panic, exit, etc.)
-      printf("Invalid memory access at address %p\n", addr);
-      p->killed = 1;
+
+        void *physical_frame = kalloc();
+        if (physical_frame) {
+            if (mappages(p->pagetable, PGROUNDDOWN(r_stval()), PGSIZE, (uint64)physical_frame, (PTE_R | PTE_W | PTE_X | PTE_U)) < 0) {
+                kfree(physical_frame);
+                p->killed = 1;
+            }
+        }
+    } else {
+        printf("usertrap(): unexpected scause %p pid=%d\n", r_scause(), p->pid);
+        printf("            sepc=%p stval=%p\n", r_sepc(), r_stval());
+        p->killed = 1;
     }
-  }else{
-    printf("usertrap(): unexpected scause %p pid=%d\n", r_scause(), p->pid);
-    printf("            sepc=%p stval=%p\n", r_sepc(), r_stval());
-    p->killed = 1;
-  }
 
-  if(p->killed)
-    exit(-1);
+    if (p->killed)
+        exit(-1);
 
-  // give up the CPU if this is a timer interrupt.
-  if(which_dev == 2)
-    yield();
+    if (which_dev == 2)
+        yield();
 
-  usertrapret();
+    usertrapret();
 }
 
 //
