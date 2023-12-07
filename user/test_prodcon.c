@@ -116,3 +116,4 @@ int main(int argc, char *argv[]) {
     run_test(4, 4);
 
     exit(0);
+}
