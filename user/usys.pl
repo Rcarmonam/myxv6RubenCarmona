@@ -42,3 +42,7 @@ entry("memoryuser");
 entry("mmap");
 entry("munmap");
 entry("private");
+entry("sem_init");
+entry("sem_destroy");
+entry("sem_wait");
+entry("sem_post");
