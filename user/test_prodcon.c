@@ -3,6 +3,23 @@
 #include "kernel/stat.h"
 #include "user/user.h"
 
+#define BSIZE 10
+#define MAX 20
+#define NULL ((void *)0)
+
+typedef struct {
+    int buf[BSIZE];
+    int nextin;
+    int nextout;
+    int num_produced;
+    int num_consumed;
+    int total;
+    sem_t occupied;
+    sem_t free;
+    sem_t lock;
+} buffer_t;
+
+buffer_t *buffer;
 void producer()
 {
   while(1) {
