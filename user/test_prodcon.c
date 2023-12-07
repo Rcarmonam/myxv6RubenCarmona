@@ -99,19 +99,19 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    // Test 1: Basic Producer-Consumer Test
+    // Test 1: 
     printf("Test 1:\n");
     run_test(1, 1);
 
-    // Test 2: Multiple Producers and Consumers Test
+    // Test 2: 
     printf("Test 2:\n");
     run_test(3, 3);
 
-    // Test 3: Priority-Based Synchronization Test
+    // Test 3: 
     printf("Test 3:\n");
     run_test(2, 2);
 
-    // Test 4: Complex Real-World Scenario Test
+    // Test 4: 
     printf("Test 4:\n");
     run_test(4, 4);
 
